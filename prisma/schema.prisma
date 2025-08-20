@@ -27,6 +27,7 @@ model User {
   orders     Order[]
 
   @@map("user")
+  @@index([id])
 }
 
 model Store {

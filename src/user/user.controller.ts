@@ -1,15 +1,25 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common'
+import {
+	Controller,
+	Get,
+	Param,
+	Patch,
+	UnauthorizedException
+} from '@nestjs/common'
 import { UserService } from './user.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CurrentUser } from './decorators/user.decorator'
 
 @Controller('user')
 export class UserController {
-	constructor(private readonly userService: UserService) {}
+	constructor(private readonly userService: UserService) {
+		console.log('User Controller')
+	}
 
 	@Auth()
 	@Get('profile')
 	async getProfile(@CurrentUser('id') id: string) {
+		if (!id) throw new UnauthorizedException('User ID is required')
+		console.log('USER id')
 		return this.userService.getById(id)
 	}
 
