@@ -17,10 +17,10 @@ model User {
   email     String   @unique
   password  String?
 
-  name     String   @default("not defined")
+  name     String?   @default("not defined")
   picture  String   @default("/uploads/no-user-image.png")
 
-  store    Store[]
+  stores    Store[]
 
   favorites  Product[]
   reviews    Review[]
