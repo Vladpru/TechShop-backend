@@ -9,7 +9,7 @@ import { UserService } from './user.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CurrentUser } from './decorators/user.decorator'
 
-@Controller('user')
+@Controller('users')
 export class UserController {
 	constructor(private readonly userService: UserService) {
 		console.log('User Controller')
