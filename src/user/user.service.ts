@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/prisma.service'
+
 import { hash } from 'argon2'
 import { AuthDto } from 'src/auth/dto/auth.dto'
 
@@ -9,10 +10,16 @@ export class UserService {
 
 	async getById(id: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { id },
+			where: {
+				id
+			},
 			include: {
 				stores: true,
-				favorites: true,
+				favorites: {
+					include: {
+						category: true
+					}
+				},
 				orders: true
 			}
 		})
@@ -22,7 +29,9 @@ export class UserService {
 
 	async getByEmail(email: string) {
 		const user = await this.prisma.user.findUnique({
-			where: { email },
+			where: {
+				email
+			},
 			include: {
 				stores: true,
 				favorites: true,
@@ -33,21 +42,25 @@ export class UserService {
 		return user
 	}
 
-	async toggleFavorites(productId: string, userId: string) {
+	async toggleFavorite(productId: string, userId: string) {
 		const user = await this.getById(userId)
 
-		if (user) {
-			const isExists = user.favorites.some(prod => prod.id === productId)
+		const isExists = user.favorites.some(
+			product => product.id === productId
+		)
 
-			await this.prisma.user.update({
-				where: { id: user.id },
-				data: {
-					favorites: {
-						[isExists ? 'disconnect' : 'connect']: { id: productId }
+		await this.prisma.user.update({
+			where: {
+				id: user.id
+			},
+			data: {
+				favorites: {
+					[isExists ? 'disconnect' : 'connect']: {
+						id: productId
 					}
 				}
-			})
-		}
+			}
+		})
 
 		return true
 	}

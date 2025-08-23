@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { PrismaService } from '../prisma.service'
+import { PrismaService } from 'src/prisma.service'
 import { CreateStoreDto } from './dto/create-store.dto'
 import { UpdateStoreDto } from './dto/update-store.dto'
 
 @Injectable()
 export class StoreService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(private prisma: PrismaService) {}
 
 	async getById(storeId: string, userId: string) {
 		const store = await this.prisma.store.findUnique({
@@ -16,7 +16,9 @@ export class StoreService {
 		})
 
 		if (!store)
-			throw new NotFoundException('Store not found or you are not the owner')
+			throw new NotFoundException(
+				'Магазин не найден или вы не являетесь его владельцем'
+			)
 
 		return store
 	}
@@ -34,12 +36,9 @@ export class StoreService {
 		await this.getById(storeId, userId)
 
 		return this.prisma.store.update({
-			where: {
-				id: storeId
-			},
+			where: { id: storeId },
 			data: {
-				title: dto.title,
-				description: dto.description,
+				...dto,
 				userId
 			}
 		})
@@ -49,9 +48,7 @@ export class StoreService {
 		await this.getById(storeId, userId)
 
 		return this.prisma.store.delete({
-			where: {
-				id: storeId
-			}
+			where: { id: storeId }
 		})
 	}
 }

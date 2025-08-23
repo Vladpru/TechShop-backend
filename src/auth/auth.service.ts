@@ -4,12 +4,12 @@ import {
 	NotFoundException,
 	UnauthorizedException
 } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { Response } from 'express'
 import { PrismaService } from 'src/prisma.service'
 import { UserService } from 'src/user/user.service'
 import { AuthDto } from './dto/auth.dto'
-import { Response } from 'express'
-import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class AuthService {
@@ -18,14 +18,15 @@ export class AuthService {
 
 	constructor(
 		private jwt: JwtService,
-		private readonly userService: UserService,
-		private readonly prisma: PrismaService,
-		private readonly configService: ConfigService
+		private userService: UserService,
+		private prisma: PrismaService,
+		private configService: ConfigService
 	) {}
 
 	async login(dto: AuthDto) {
 		const user = await this.validateUser(dto)
-		const tokens = this.issueToken(user.id)
+
+		const tokens = this.issueTokens(user.id)
 
 		return { user, ...tokens }
 	}
@@ -33,26 +34,28 @@ export class AuthService {
 	async register(dto: AuthDto) {
 		const oldUser = await this.userService.getByEmail(dto.email)
 
-		if (oldUser) throw new BadRequestException('User already exist')
+		if (oldUser)
+			throw new BadRequestException('Пользователь уже существует')
 
 		const user = await this.userService.create(dto)
-		const tokens = this.issueToken(user.id)
+
+		const tokens = this.issueTokens(user.id)
 
 		return { user, ...tokens }
 	}
 
 	async getNewTokens(refreshToken: string) {
-		const res = await this.jwt.verifyAsync(refreshToken)
-		if (!res) throw new UnauthorizedException('Invalid token')
+		const result = await this.jwt.verifyAsync(refreshToken)
+		if (!result) throw new UnauthorizedException('Невалидный refresh токен')
 
-		const user = await this.userService.getById(res.id)
-		if (user) {
-			const tokens = this.issueToken(user.id)
-			return { user, ...tokens }
-		}
+		const user = await this.userService.getById(result.id)
+
+		const tokens = this.issueTokens(user.id)
+
+		return { user, ...tokens }
 	}
 
-	issueToken(userId: string) {
+	issueTokens(userId: string) {
 		const data = { id: userId }
 
 		const accessToken = this.jwt.sign(data, {
@@ -69,7 +72,7 @@ export class AuthService {
 	private async validateUser(dto: AuthDto) {
 		const user = await this.userService.getByEmail(dto.email)
 
-		if (!user) throw new NotFoundException('User not found')
+		if (!user) throw new NotFoundException('Пользователь не найден')
 
 		return user
 	}
@@ -92,7 +95,7 @@ export class AuthService {
 			})
 		}
 
-		const tokens = this.issueToken(user.id)
+		const tokens = this.issueTokens(user.id)
 
 		return { user, ...tokens }
 	}

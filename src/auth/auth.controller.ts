@@ -11,11 +11,10 @@ import {
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
+import { AuthGuard } from '@nestjs/passport'
+import type { Request, Response } from 'express'
 import { AuthService } from './auth.service'
 import { AuthDto } from './dto/auth.dto'
-import type { Request, Response } from 'express'
-import { AuthGuard } from '@nestjs/passport'
-import { Auth } from './decorators/auth.decorator'
 
 @Controller('auth')
 export class AuthController {
@@ -58,17 +57,12 @@ export class AuthController {
 
 		if (!refreshTokenFromCookies) {
 			this.authService.removeRefreshTokenFromResponse(res)
-			throw new UnauthorizedException('Refresh token not found')
+			throw new UnauthorizedException('Refresh токен не прошел')
 		}
 
-		const tokens = await this.authService.getNewTokens(refreshTokenFromCookies)
-
-		if (!tokens) {
-			this.authService.removeRefreshTokenFromResponse(res)
-			throw new UnauthorizedException('Invalid refresh token')
-		}
-
-		const { refreshToken, ...response } = tokens
+		const { refreshToken, ...response } = await this.authService.getNewTokens(
+			refreshTokenFromCookies
+		)
 
 		this.authService.addRefreshTokenToResponse(res, refreshToken)
 
@@ -82,16 +76,14 @@ export class AuthController {
 		return true
 	}
 
-	// for google
-
 	@Get('google')
 	@UseGuards(AuthGuard('google'))
-	async googleAuth(@Req() _req) {}
+	async googleAuth(@Req() req) {}
 
 	@Get('google/callback')
 	@UseGuards(AuthGuard('google'))
 	async googleAuthCallback(
-		@Req() req: any,
+		@Req() req,
 		@Res({ passthrough: true }) res: Response
 	) {
 		const { refreshToken, ...response } =
@@ -100,7 +92,7 @@ export class AuthController {
 		this.authService.addRefreshTokenToResponse(res, refreshToken)
 
 		return res.redirect(
-			`${process.env['CLIENT_URL']}/dashboard?access_token=${response.accessToken}`
+			`${process.env['CLIENT_URL']}/dashboard?accessToken=${response.accessToken}`
 		)
 	}
 }

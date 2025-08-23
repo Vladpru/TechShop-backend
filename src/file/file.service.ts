@@ -10,19 +10,22 @@ export class FileService {
 
 		await ensureDir(uploadedFolder)
 
-		const res: FileResponse[] = await Promise.all(
+		const response: FileResponse[] = await Promise.all(
 			files.map(async file => {
-				const name = `${Date.now()}-${file.originalname}`
+				const originalName = `${Date.now()}-${file.originalname}`
 
-				await writeFile(`${uploadedFolder}/${name}`, file.buffer)
+				await writeFile(
+					`${uploadedFolder}/${originalName}`,
+					file.buffer
+				)
 
 				return {
-					url: `/uploads/${folder}/${name}`,
-					name: name
+					url: `/uploads/${folder}/${originalName}`,
+					name: originalName
 				}
 			})
 		)
-		console.log('Response:', res)
-		return res
+
+		return response
 	}
 }

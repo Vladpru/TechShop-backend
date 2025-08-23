@@ -10,23 +10,15 @@ import {
 	UsePipes,
 	ValidationPipe
 } from '@nestjs/common'
-import { StoreService } from './store.service'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CurrentUser } from 'src/user/decorators/user.decorator'
 import { CreateStoreDto } from './dto/create-store.dto'
 import { UpdateStoreDto } from './dto/update-store.dto'
+import { StoreService } from './store.service'
 
 @Controller('stores')
 export class StoreController {
 	constructor(private readonly storeService: StoreService) {}
-
-	@UsePipes(new ValidationPipe())
-	@HttpCode(200)
-	@Auth()
-	@Post()
-	async create(@CurrentUser('id') userId: string, @Body() dto: CreateStoreDto) {
-		return this.storeService.create(userId, dto)
-	}
 
 	@Auth()
 	@Get('by-id/:id')
@@ -35,6 +27,17 @@ export class StoreController {
 		@CurrentUser('id') userId: string
 	) {
 		return this.storeService.getById(storeId, userId)
+	}
+
+	@UsePipes(new ValidationPipe())
+	@HttpCode(200)
+	@Auth()
+	@Post()
+	async create(
+		@CurrentUser('id') userId: string,
+		@Body() dto: CreateStoreDto
+	) {
+		return this.storeService.create(userId, dto)
 	}
 
 	@UsePipes(new ValidationPipe())

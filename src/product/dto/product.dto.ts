@@ -1,55 +1,40 @@
-import { ArrayMinSize, IsInt, IsNotEmpty, IsString } from 'class-validator'
+import { ArrayMinSize, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 export class ProductDto {
 	@IsString({
-		message: 'Title is required'
+		message: 'Название обязательно'
 	})
-	@IsNotEmpty({
-		message: 'Title cannot be empty'
-	})
+	@IsNotEmpty({ message: 'Название не может быть пустым' })
 	title: string
 
-	@IsString({
-		message: 'Description is required'
-	})
-	@IsNotEmpty({
-		message: 'Description cannot be empty'
-	})
+	@IsString({ message: 'Описание обязательно' })
+	@IsNotEmpty({ message: 'Описание не может быть пустым' })
 	description: string
 
-	@IsInt({
-		message: 'Price must be a number'
-	})
-	@IsNotEmpty({
-		message: 'Price cannot be empty'
-	})
+	@IsNumber({}, { message: 'Цена должна быть числом' })
+	@IsNotEmpty({ message: 'Цена не может быть пустой' })
 	price: number
 
 	@IsString({
-		message: 'Image is required',
+		message: 'Укажите хотя бы одну картинку',
 		each: true
 	})
-	@ArrayMinSize(1, {
-		message: 'Image must be an array with at least one element'
-	})
+	@ArrayMinSize(1, { message: 'Должна быть хотя бы одна картинка' })
 	@IsNotEmpty({
-		message: 'Image path cannot be empty'
+		each: true,
+		message: 'Путь к картинке не может быть пустым'
 	})
-	image: string[]
+	images: string[]
 
 	@IsString({
-		message: 'Category is required'
+		message: 'Категория обязательна'
 	})
-	@IsNotEmpty({
-		message: 'Category ID cannot be empty'
-	})
+	@IsNotEmpty({ message: 'ID категории не может быть пустым' })
 	categoryId: string
 
 	@IsString({
-		message: 'Color is required'
+		message: 'Цвет обязателен'
 	})
-	@IsNotEmpty({
-		message: 'Color ID cannot be empty'
-	})
+	@IsNotEmpty({ message: 'ID цвета не может быть пустым' })
 	colorId: string
 }

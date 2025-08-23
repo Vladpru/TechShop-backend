@@ -2,12 +2,12 @@ import { IsString } from 'class-validator'
 
 export class ColorDto {
 	@IsString({
-		message: 'Name is neccessary'
+		message: 'Название обязательно'
 	})
 	name: string
 
 	@IsString({
-		message: 'Value is neccessary'
+		message: 'Значение обязательно'
 	})
 	value: string
 }

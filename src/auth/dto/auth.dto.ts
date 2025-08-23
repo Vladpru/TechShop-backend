@@ -6,16 +6,16 @@ export class AuthDto {
 	name: string
 
 	@IsString({
-		message: 'Email is neccessary'
+		message: 'Почта обязательна'
 	})
 	@IsEmail()
 	email: string
 
 	@MinLength(6, {
-		message: 'Password is too short, it must be at least 6 characters long'
+		message: 'Пароль должен содержать не менее 6 символов!'
 	})
 	@IsString({
-		message: 'Password is neccessary'
+		message: 'Пароль обязателен'
 	})
 	password: string
 }

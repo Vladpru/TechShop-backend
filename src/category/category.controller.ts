@@ -18,6 +18,17 @@ import { CategoryDto } from './dto/category.dto'
 export class CategoryController {
 	constructor(private readonly categoryService: CategoryService) {}
 
+	@Auth()
+	@Get('by-storeId/:storeId')
+	async getByStoreId(@Param('storeId') storeId: string) {
+		return this.categoryService.getByStoreId(storeId)
+	}
+
+	@Get('by-id/:id')
+	async getById(@Param('id') id: string) {
+		return this.categoryService.getById(id)
+	}
+
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
 	@Auth()
@@ -26,30 +37,18 @@ export class CategoryController {
 		return this.categoryService.create(storeId, dto)
 	}
 
-	@Auth()
-	@Get('by-storeId/:storeId')
-	async getByStoreId(@Param('storeId') storeId: string) {
-		return this.categoryService.getByStoreId(storeId)
-	}
-
-	@Auth()
-	@Get('by-id/:id')
-	async getById(@Param('id') categoryId: string) {
-		return this.categoryService.getById(categoryId)
-	}
-
 	@UsePipes(new ValidationPipe())
 	@HttpCode(200)
 	@Auth()
 	@Put(':id')
-	async update(@Param('id') categoryId: string, @Body() dto: CategoryDto) {
-		return this.categoryService.update(categoryId, dto)
+	async update(@Param('id') id: string, @Body() dto: CategoryDto) {
+		return this.categoryService.update(id, dto)
 	}
 
 	@HttpCode(200)
 	@Auth()
 	@Delete(':id')
-	async delete(@Param('id') categoryId: string) {
-		return this.categoryService.delete(categoryId)
+	async delete(@Param('id') id: string) {
+		return this.categoryService.delete(id)
 	}
 }

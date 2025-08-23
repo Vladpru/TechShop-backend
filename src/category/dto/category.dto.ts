@@ -2,12 +2,12 @@ import { IsString } from 'class-validator'
 
 export class CategoryDto {
 	@IsString({
-		message: 'Title is neccessary'
+		message: 'Название обязательно'
 	})
 	title: string
 
 	@IsString({
-		message: 'Description is neccessary'
+		message: 'Описание обязательно'
 	})
 	description: string
 }

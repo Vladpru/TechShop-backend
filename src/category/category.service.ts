@@ -7,19 +7,21 @@ export class CategoryService {
 	constructor(private prisma: PrismaService) {}
 
 	async getByStoreId(storeId: string) {
-		return this.prisma.color.findMany({
-			where: { storeId }
+		return this.prisma.category.findMany({
+			where: {
+				storeId
+			}
 		})
 	}
 
 	async getById(id: string) {
-		const category = await this.prisma.store.findUnique({
+		const category = await this.prisma.category.findUnique({
 			where: {
 				id
 			}
 		})
 
-		if (!category) throw new NotFoundException('Category not found')
+		if (!category) throw new NotFoundException('Категория не найдена')
 
 		return category
 	}
@@ -34,24 +36,20 @@ export class CategoryService {
 		})
 	}
 
-	async update(categoryId: string, dto: CategoryDto) {
-		await this.getById(categoryId)
+	async update(id: string, dto: CategoryDto) {
+		await this.getById(id)
 
 		return this.prisma.category.update({
-			where: {
-				id: categoryId
-			},
+			where: { id },
 			data: dto
 		})
 	}
 
-	async delete(categoryId: string) {
-		await this.getById(categoryId)
+	async delete(id: string) {
+		await this.getById(id)
 
 		return this.prisma.category.delete({
-			where: {
-				id: categoryId
-			}
+			where: { id }
 		})
 	}
 }

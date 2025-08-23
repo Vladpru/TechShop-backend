@@ -8,18 +8,20 @@ export class ColorService {
 
 	async getByStoreId(storeId: string) {
 		return this.prisma.color.findMany({
-			where: { storeId }
+			where: {
+				storeId
+			}
 		})
 	}
 
 	async getById(id: string) {
-		const color = await this.prisma.store.findUnique({
+		const color = await this.prisma.color.findUnique({
 			where: {
 				id
 			}
 		})
 
-		if (!color) throw new NotFoundException('Color not found')
+		if (!color) throw new NotFoundException('Цвет не найден')
 
 		return color
 	}
@@ -34,24 +36,20 @@ export class ColorService {
 		})
 	}
 
-	async update(colorId: string, dto: ColorDto) {
-		await this.getById(colorId)
+	async update(id: string, dto: ColorDto) {
+		await this.getById(id)
 
 		return this.prisma.color.update({
-			where: {
-				id: colorId
-			},
+			where: { id },
 			data: dto
 		})
 	}
 
-	async delete(colorId: string) {
-		await this.getById(colorId)
+	async delete(id: string) {
+		await this.getById(id)
 
 		return this.prisma.color.delete({
-			where: {
-				id: colorId
-			}
+			where: { id }
 		})
 	}
 }

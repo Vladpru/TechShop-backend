@@ -6,9 +6,9 @@ import {
 	UploadedFiles,
 	UseInterceptors
 } from '@nestjs/common'
-import { FileService } from './file.service'
 import { FilesInterceptor } from '@nestjs/platform-express'
 import { Auth } from 'src/auth/decorators/auth.decorator'
+import { FileService } from './file.service'
 
 @Controller('files')
 export class FileController {

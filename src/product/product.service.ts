@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException } from '@nestjs/common'
-import { contains } from 'class-validator'
 import { PrismaService } from 'src/prisma.service'
 import { ProductDto } from './dto/product.dto'
 
@@ -10,7 +9,7 @@ export class ProductService {
 	async getAll(searchTerm?: string) {
 		if (searchTerm) return this.getSearchTermFilter(searchTerm)
 
-		const products = await this.prisma.product.findMany({
+		return this.prisma.product.findMany({
 			orderBy: {
 				createdAt: 'desc'
 			},
@@ -18,30 +17,37 @@ export class ProductService {
 				category: true
 			}
 		})
-
-		return products
 	}
 
-	private getSearchTermFilter(searchTerm: string) {
-		return {
-			OR: [
-				{
-					title: {
-						contains: searchTerm,
-						mode: 'insensitive'
+	private async getSearchTermFilter(searchTerm: string) {
+		return this.prisma.product.findMany({
+			where: {
+				OR: [
+					{
+						title: {
+							contains: searchTerm,
+							mode: 'insensitive'
+						}
 					},
-					description: {
-						contains: searchTerm,
-						mode: 'insensitive'
+					{
+						description: {
+							contains: searchTerm,
+							mode: 'insensitive'
+						}
 					}
-				}
-			]
-		}
+				]
+			},
+			include: {
+				category: true
+			}
+		})
 	}
 
 	async getByStoreId(storeId: string) {
 		return this.prisma.product.findMany({
-			where: { storeId },
+			where: {
+				storeId
+			},
 			include: {
 				category: true,
 				color: true
@@ -57,11 +63,15 @@ export class ProductService {
 			include: {
 				category: true,
 				color: true,
-				reviews: true
+				reviews: {
+					include: {
+						user: true
+					}
+				}
 			}
 		})
 
-		if (!product) throw new NotFoundException('Product not found')
+		if (!product) throw new NotFoundException('Товар не найден')
 
 		return product
 	}
@@ -78,7 +88,7 @@ export class ProductService {
 			}
 		})
 
-		if (!products) throw new NotFoundException('Product not found')
+		if (!products) throw new NotFoundException('Товары не найдены')
 
 		return products
 	}
@@ -96,9 +106,7 @@ export class ProductService {
 			}
 		})
 
-		const productIds = mostPopularProducts
-			.map(item => item.productId)
-			.filter((id): id is string => id !== null)
+		const productIds = mostPopularProducts.map(item => item.productId)
 
 		const products = await this.prisma.product.findMany({
 			where: {
@@ -117,11 +125,10 @@ export class ProductService {
 	async getSimilar(id: string) {
 		const currentProduct = await this.getById(id)
 
-		if (!currentProduct || !currentProduct.category) {
-			throw new NotFoundException('Current product or category not found')
-		}
+		if (!currentProduct)
+			throw new NotFoundException('Текущий товар не найден')
 
-		const products = this.prisma.product.findMany({
+		const products = await this.prisma.product.findMany({
 			where: {
 				category: {
 					title: currentProduct.category.title
@@ -147,7 +154,7 @@ export class ProductService {
 				title: dto.title,
 				description: dto.description,
 				price: dto.price,
-				image: Array.isArray(dto.image) ? JSON.stringify(dto.image) : dto.image,
+				images: dto.images,
 				categoryId: dto.categoryId,
 				colorId: dto.colorId,
 				storeId
@@ -159,13 +166,8 @@ export class ProductService {
 		await this.getById(id)
 
 		return this.prisma.product.update({
-			where: {
-				id
-			},
-			data: {
-				...dto,
-				image: Array.isArray(dto.image) ? JSON.stringify(dto.image) : dto.image
-			}
+			where: { id },
+			data: dto
 		})
 	}
 
@@ -173,9 +175,7 @@ export class ProductService {
 		await this.getById(id)
 
 		return this.prisma.product.delete({
-			where: {
-				id
-			}
+			where: { id }
 		})
 	}
 }

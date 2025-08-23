@@ -1,34 +1,24 @@
-import {
-	Controller,
-	Get,
-	Param,
-	Patch,
-	UnauthorizedException
-} from '@nestjs/common'
-import { UserService } from './user.service'
+import { Controller, Get, Param, Patch } from '@nestjs/common'
 import { Auth } from 'src/auth/decorators/auth.decorator'
 import { CurrentUser } from './decorators/user.decorator'
+import { UserService } from './user.service'
 
 @Controller('users')
 export class UserController {
-	constructor(private readonly userService: UserService) {
-		console.log('User Controller')
-	}
+	constructor(private readonly userService: UserService) {}
 
 	@Auth()
 	@Get('profile')
 	async getProfile(@CurrentUser('id') id: string) {
-		if (!id) throw new UnauthorizedException('User ID is required')
-		console.log('USER id')
 		return this.userService.getById(id)
 	}
 
 	@Auth()
 	@Patch('profile/favorites/:productId')
 	async toggleFavorite(
-		@CurrentUser('id') id: string,
+		@CurrentUser('id') userId: string,
 		@Param('productId') productId: string
 	) {
-		return this.userService.toggleFavorites(productId, id)
+		return this.userService.toggleFavorite(productId, userId)
 	}
 }
